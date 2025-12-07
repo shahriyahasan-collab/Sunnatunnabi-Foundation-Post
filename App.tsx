@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Download, RefreshCw, Layout, Image as ImageIcon, Droplets, Sprout, Heart, Utensils, Share2, Palette, Type, Settings, Upload, Eye, EyeOff, Check, Filter, Trash2, Plus, ChevronDown, ChevronUp, Languages, ArrowUp, ArrowDown } from 'lucide-react';
+import html2canvas from 'html2canvas';
 
 // --- Data: Hadith Database (Bangla, Arabic, English) ---
 const QUOTES = [
@@ -354,7 +355,6 @@ const MainComponent = () => {
 
   const [selectedTopics, setSelectedTopics] = useState(AVAILABLE_TOPICS.map(t => t.id));
   const [isGenerating, setIsGenerating] = useState(false);
-  const [libLoaded, setLibLoaded] = useState(false);
   
   // Accordion State
   const [openSections, setOpenSections] = useState({
@@ -378,18 +378,6 @@ const MainComponent = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !window.html2canvas) {
-      const script = document.createElement('script');
-      script.src = "https://html2canvas.hertzen.com/dist/html2canvas.min.js";
-      script.async = true;
-      script.onload = () => setLibLoaded(true);
-      document.body.appendChild(script);
-    } else {
-      setLibLoaded(true);
-    }
-  }, []);
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => ({
@@ -485,13 +473,13 @@ const MainComponent = () => {
   };
 
   const handleDownload = async () => {
-    if (!canvasRef.current || !libLoaded) {
+    if (!canvasRef.current) {
       alert("Please wait a moment for the generator to initialize.");
       return;
     }
     setIsGenerating(true);
     try {
-      const canvas = await window.html2canvas(canvasRef.current, {
+      const canvas = await html2canvas(canvasRef.current, {
         useCORS: true, 
         scale: 2,
         allowTaint: false, 
@@ -1052,7 +1040,7 @@ const MainComponent = () => {
 
           <button 
             onClick={handleDownload}
-            disabled={isGenerating || !libLoaded}
+            disabled={isGenerating}
             className="w-full py-4 bg-[#DC2626] hover:bg-red-700 text-white rounded-xl font-bold shadow-lg shadow-red-900/20 text-lg flex items-center justify-center gap-3 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed mb-8"
           >
             {isGenerating ? (
